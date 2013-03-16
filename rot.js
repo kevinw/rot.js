@@ -942,10 +942,10 @@ ROT.Display.prototype.computeFontSize = function(availWidth, availHeight) {
  * @param {string} [fg] foreground color
  * @param {string} [bg] background color
  */
-ROT.Display.prototype.draw = function(x, y, ch, fg, bg) {
+ROT.Display.prototype.draw = function(x, y, ch, fg, bg, opts) {
 	if (!fg) { fg = this._options.fg; }
 	if (!bg) { bg = this._options.bg; }
-	this._data[x+","+y] = [x, y, ch, fg, bg];
+	this._data[x+","+y] = [x, y, ch, fg, bg, opts];
 	
 	if (this._dirty === true) { return; } /* will already redraw everything */
 	if (!this._dirty) { this._dirty = {}; } /* first! */
@@ -1122,6 +1122,7 @@ ROT.Display.Rect.prototype._drawNoCache = function(data, clearBefore) {
 	var ch = data[2];
 	var fg = data[3];
 	var bg = data[4];
+    var opts = data[5];
 
 	if (clearBefore) { 
 		this._context.fillStyle = bg;
@@ -1131,7 +1132,14 @@ ROT.Display.Rect.prototype._drawNoCache = function(data, clearBefore) {
 	if (!ch) { return; }
 
 	this._context.fillStyle = fg;
-	this._context.fillText(ch, (x+0.5) * this._spacingX, (y+0.5) * this._spacingY);
+
+    var xoff = 0, yoff = 0;
+    if (opts && opts.jiggle) {
+        xoff = opts.jiggle[0];
+        yoff = opts.jiggle[1];
+    }
+
+	this._context.fillText(ch, (x+0.5) * this._spacingX + xoff, (y+0.5) * this._spacingY + yoff);
 }
 
 ROT.Display.Rect.prototype.computeSize = function(availWidth, availHeight) {
